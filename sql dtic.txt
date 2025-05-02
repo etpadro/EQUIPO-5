@@ -1,0 +1,186 @@
+-- Tabla de estados para equipos
+CREATE TABLE `estados_equipo` (
+  `id_estado_equipo` INT NOT NULL AUTO_INCREMENT,
+  `nombre_estado_equipo` VARCHAR(50) NOT NULL,
+  `descripcion_estado_equipo` VARCHAR(255),
+  `comentario_estado_equipo` VARCHAR(255),
+  PRIMARY KEY (`id_estado_equipo`),
+  UNIQUE KEY (`nombre_estado_equipo`)
+);
+
+-- Tabla de estados para requerimientos
+CREATE TABLE `estados_requerimiento` (
+  `id_estado_requerimiento` INT NOT NULL AUTO_INCREMENT,
+  `nombre_estado_requerimiento` VARCHAR(50) NOT NULL,
+  `descripcion_estado_requerimiento` VARCHAR(255),
+  `comentario_estado_requerimiento` VARCHAR(255),
+  PRIMARY KEY (`id_estado_requerimiento`),
+  UNIQUE KEY (`nombre_estado_requerimiento`)
+);
+
+-- Tabla tipos de usuario
+CREATE TABLE `tipos_usuario` (
+  `id_tipo_usuario` INT NOT NULL AUTO_INCREMENT,
+  `nombre_tipo_usuario` VARCHAR(50) NOT NULL,
+  `descripcion_tipo_usuario` VARCHAR(255),
+  `comentario_tipo_usuario` VARCHAR(255),
+  PRIMARY KEY (`id_tipo_usuario`),
+  UNIQUE KEY (`nombre_tipo_usuario`)
+);
+
+-- Tabla cursos
+CREATE TABLE `cursos` (
+  `id_curso` INT NOT NULL AUTO_INCREMENT,
+  `nombre_curso` VARCHAR(100) NOT NULL,
+  `descripcion_curso` VARCHAR(255) NOT NULL,
+  `fecha_inicio` DATE NOT NULL,
+  `horario_curso` VARCHAR(50) NOT NULL,
+  `costo_curso` DECIMAL(10,2) NOT NULL,
+  `cupo_curso` INT NOT NULL,
+  `comentario_curso` VARCHAR(255),
+  PRIMARY KEY (`id_curso`)
+);
+
+-- Tabla equipos
+CREATE TABLE `equipos` (
+  `id_equipo` INT NOT NULL AUTO_INCREMENT,
+  `nombre_equipo` VARCHAR(100) NOT NULL,
+  `descripcion_equipo` VARCHAR(255) NOT NULL,
+  `capacidad_memoria_equipo` VARCHAR(50),
+  `paquetes_software_equipo` VARCHAR(255),
+  `comentario_equipo` VARCHAR(255),
+  PRIMARY KEY (`id_equipo`)
+);
+
+-- Tabla servicios
+CREATE TABLE `servicios` (
+  `id_servicio` INT NOT NULL AUTO_INCREMENT,
+  `nombre_servicio` VARCHAR(100) NOT NULL,
+  `descripcion_servicio` VARCHAR(255) NOT NULL,
+  `comentario_servicio` VARCHAR(255),
+  PRIMARY KEY (`id_servicio`)
+);
+
+-- Tabla usuarios
+CREATE TABLE `usuarios_tic` (
+  `id_usuario` INT NOT NULL AUTO_INCREMENT,
+  `nombre_usuario` VARCHAR(100) NOT NULL,
+  `email_usuario` VARCHAR(100) NOT NULL,
+  `telefono_usuario` VARCHAR(20),
+  `id_tipo_usuario` INT NOT NULL,
+  `contraseña_usuario` VARCHAR(255) NOT NULL,
+  `comentario_usuario` VARCHAR(255),
+  PRIMARY KEY (`id_usuario`),
+  UNIQUE KEY (`email_usuario`),
+  FOREIGN KEY (`id_tipo_usuario`) REFERENCES `tipos_usuario` (`id_tipo_usuario`)
+    ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- Tabla requerimientos
+CREATE TABLE `requerimientos` (
+  `id_requerimiento` INT NOT NULL AUTO_INCREMENT,
+  `id_usuario` INT,
+  `id_servicio` INT,
+  `id_estado_requerimiento` INT NOT NULL,
+  `descripcion_requerimiento` VARCHAR(255) NOT NULL,
+  `fecha_creacion` DATE NOT NULL,
+  `comentario_requerimiento` VARCHAR(255),
+  PRIMARY KEY (`id_requerimiento`),
+  FOREIGN KEY (`id_usuario`) REFERENCES `usuarios_tic` (`id_usuario`)
+    ON UPDATE CASCADE ON DELETE SET NULL,
+  FOREIGN KEY (`id_servicio`) REFERENCES `servicios` (`id_servicio`)
+    ON UPDATE CASCADE ON DELETE SET NULL,
+  FOREIGN KEY (`id_estado_requerimiento`) REFERENCES `estados_requerimiento` (`id_estado_requerimiento`)
+    ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- Tabla equipos_requerimientos
+CREATE TABLE `equipos_requerimientos` (
+  `id_equipo_requerimiento` INT NOT NULL AUTO_INCREMENT,
+  `id_requerimiento` INT,
+  `id_equipo` INT,
+  `id_estado_equipo` INT NOT NULL,
+  `comentario_equipo_requerimiento` VARCHAR(255),
+  PRIMARY KEY (`id_equipo_requerimiento`),
+  FOREIGN KEY (`id_requerimiento`) REFERENCES `requerimientos` (`id_requerimiento`)
+    ON UPDATE CASCADE ON DELETE SET NULL,
+  FOREIGN KEY (`id_equipo`) REFERENCES `equipos` (`id_equipo`)
+    ON UPDATE CASCADE ON DELETE SET NULL,
+  FOREIGN KEY (`id_estado_equipo`) REFERENCES `estados_equipo` (`id_estado_equipo`)
+    ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- Tabla preinscripciones
+CREATE TABLE `preinscripciones` (
+  `id_preinscripcion` INT NOT NULL AUTO_INCREMENT,
+  `id_usuario` INT,
+  `id_curso` INT,
+  `fecha_inscripcion` DATE NOT NULL,
+  `comentario_preinscripcion` VARCHAR(255),
+  PRIMARY KEY (`id_preinscripcion`),
+  FOREIGN KEY (`id_usuario`) REFERENCES `usuarios_tic` (`id_usuario`)
+    ON UPDATE CASCADE ON DELETE SET NULL,
+  FOREIGN KEY (`id_curso`) REFERENCES `cursos` (`id_curso`)
+    ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+-- Tabla reportes
+CREATE TABLE `reportes` (
+  `id_reporte` INT NOT NULL AUTO_INCREMENT,
+  `id_requerimiento` INT,
+  `detalles_reporte` VARCHAR(255) NOT NULL,
+  `fecha_generacion` DATE NOT NULL,
+  `comentario_reporte` VARCHAR(255),
+  PRIMARY KEY (`id_reporte`),
+  FOREIGN KEY (`id_requerimiento`) REFERENCES `requerimientos` (`id_requerimiento`)
+    ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+-- Tabla tecnicos_asignados
+CREATE TABLE `tecnicos_asignados` (
+  `id_asignacion` INT NOT NULL AUTO_INCREMENT,
+  `id_requerimiento` INT,
+  `id_tecnico` INT,
+  `fecha_asignacion` DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `comentario_asignacion` VARCHAR(255),
+  PRIMARY KEY (`id_asignacion`),
+  FOREIGN KEY (`id_requerimiento`) REFERENCES `requerimientos` (`id_requerimiento`)
+    ON UPDATE CASCADE ON DELETE SET NULL,
+  FOREIGN KEY (`id_tecnico`) REFERENCES `usuarios_tic` (`id_usuario`)
+    ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+-- Tabla departamentos
+CREATE TABLE `departamentos` (
+  `id_departamento` INT NOT NULL AUTO_INCREMENT,
+  `nombre_departamento` VARCHAR(100) NOT NULL,
+  `descripcion_departamento` VARCHAR(255),
+  `comentario_departamento` VARCHAR(255),
+  PRIMARY KEY (`id_departamento`)
+);
+
+-- Relación usuario-departamento
+CREATE TABLE `usuarios_departamentos` (
+  `id_usuario_departamento` INT NOT NULL AUTO_INCREMENT,
+  `id_usuario` INT,
+  `id_departamento` INT,
+  `comentario_usuario_departamento` VARCHAR(255),
+  PRIMARY KEY (`id_usuario_departamento`),
+  FOREIGN KEY (`id_usuario`) REFERENCES `usuarios_tic` (`id_usuario`)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (`id_departamento`) REFERENCES `departamentos` (`id_departamento`)
+    ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- Relación equipo-departamento
+CREATE TABLE `equipos_departamentos` (
+  `id_equipo_departamento` INT NOT NULL AUTO_INCREMENT,
+  `id_equipo` INT,
+  `id_departamento` INT,
+  `comentario_equipo_departamento` VARCHAR(255),
+  PRIMARY KEY (`id_equipo_departamento`),
+  FOREIGN KEY (`id_equipo`) REFERENCES `equipos` (`id_equipo`)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (`id_departamento`) REFERENCES `departamentos` (`id_departamento`)
+    ON UPDATE CASCADE ON DELETE CASCADE
+);
